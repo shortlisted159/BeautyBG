@@ -371,31 +371,42 @@ const ImageEditor = () => {
           </div>
         ) : (
           <div 
-            className={`${selectedBackground.class} p-6 flex items-center justify-center w-full h-full overflow-auto`}
+            className={`p-6 flex items-center justify-center w-full h-full overflow-auto ${
+              selectedBackground.class.startsWith('bg-gradient-to-r') || 
+              selectedBackground.class.startsWith('bg-[') 
+                ? '' 
+                : selectedBackground.class
+            }`}
             style={{ 
-              minHeight: "500px", 
-              background: selectedBackground.class.startsWith('bg-gradient-to-r') || selectedBackground.class.startsWith('bg-[') 
+              minHeight: "500px",
+              background: selectedBackground.class.startsWith('bg-gradient-to-r') || 
+                         selectedBackground.class.startsWith('bg-[') 
                 ? selectedBackground.class.startsWith('bg-[') 
                   ? selectedBackground.value 
                   : `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
                 : undefined
             }}
-            className={selectedBackground.class.startsWith('bg-gradient-to-r') || selectedBackground.class.startsWith('bg-[') ? '' : selectedBackground.class}
           >
             <ContextMenu>
               <ContextMenuTrigger>
                 <div 
                   ref={resultRef}
+                  className={
+                    selectedBackground.class.startsWith('bg-gradient-to-r') || 
+                    selectedBackground.class.startsWith('bg-[') 
+                      ? '' 
+                      : selectedBackground.class
+                  }
                   style={{ 
                     padding: `${padding}px`,
                     maxWidth: "100%",
-                    background: selectedBackground.class.startsWith('bg-gradient-to-r') || selectedBackground.class.startsWith('bg-[')
+                    background: selectedBackground.class.startsWith('bg-gradient-to-r') || 
+                              selectedBackground.class.startsWith('bg-[')
                       ? selectedBackground.class.startsWith('bg-[') 
                         ? selectedBackground.value 
                         : `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
                       : undefined
                   }}
-                  className={selectedBackground.class.startsWith('bg-gradient-to-r') || selectedBackground.class.startsWith('bg-[') ? '' : selectedBackground.class}
                 >
                   {selectedRatio.value !== null ? (
                     <AspectRatio ratio={selectedRatio.value} className="relative">
