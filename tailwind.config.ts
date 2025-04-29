@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -84,11 +85,25 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out'
+			},
+			backgroundImage: {
+				'gradient-beach': 'linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%)',
+				'gradient-cool': 'linear-gradient(90deg, #accbee 0%, #e7f0fd 100%)',
+				'gradient-violet': 'linear-gradient(90deg, #7028e4 0%, #e5b2ca 100%)',
+				'gradient-rose': 'linear-gradient(90deg, #ee9ca7 0%, #ffdde1 100%)',
+				'gradient-love': 'linear-gradient(90deg, #ff758c 0%, #ff7eb3 100%)',
+				'gradient-flower': 'linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%)',
+				'gradient-sky': 'linear-gradient(90deg, #89f7fe 0%, #66a6ff 100%)',
 			}
 		}
 	},
