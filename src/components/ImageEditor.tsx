@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
@@ -68,9 +67,11 @@ const ImageEditor = () => {
   const [selectedRatio, setSelectedRatio] = useState<{ name: string; value: number | null }>(ratios[0]);
   const [inset, setInset] = useState<boolean>(false);
   const [imageSize, setImageSize] = useState<number>(100); // Added for image size control (percentage)
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const bgImageInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   
   // Handle image upload via file input
@@ -81,6 +82,19 @@ const ImageEditor = () => {
       reader.onload = (event) => {
         setImage(event.target?.result as string);
         toast.success("Image uploaded successfully!");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle background image upload
+  const handleBgImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setBackgroundImage(event.target?.result as string);
+        toast.success("Background image uploaded successfully!");
       };
       reader.readAsDataURL(file);
     }
@@ -148,12 +162,39 @@ const ImageEditor = () => {
     setBorderRadius(template.borderRadius);
     setShadow(template.shadow);
     setInset(template.inset);
+    
+    // Find matching ratio or keep current if not found
     if (template.aspectRatio !== null) {
-      const matchingRatio = ratios.find(r => r.value === template.aspectRatio) || 
-                          { name: `Custom ${template.aspectRatio}`, value: template.aspectRatio };
-      setSelectedRatio(matchingRatio);
+      const matchingRatio = ratios.find(r => r.value === template.aspectRatio);
+      if (matchingRatio) {
+        setSelectedRatio(matchingRatio);
+      } else {
+        setSelectedRatio({ name: `Custom ${template.aspectRatio}`, value: template.aspectRatio });
+      }
     }
+    
     toast.success(`Applied ${template.name} template`);
+  };
+
+  // Get background style based on selected type
+  const getBackgroundStyle = () => {
+    if (backgroundType === "image" && backgroundImage) {
+      return {
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      };
+    } else if (backgroundType === "plain" || selectedBackground.class.startsWith('bg-[')) {
+      return {
+        backgroundColor: selectedBackground.value
+      };
+    } else if (selectedBackground.class.startsWith('bg-gradient-to-r')) {
+      return {
+        background: `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
+      };
+    } else {
+      return {};
+    }
   };
 
   return (
@@ -324,6 +365,8 @@ const ImageEditor = () => {
                 onSelectBackground={setSelectedBackground}
                 backgroundType={backgroundType}
                 onBackgroundTypeChange={setBackgroundType}
+                onBackgroundImageSelect={handleBgImageUpload}
+                backgroundImageInputRef={bgImageInputRef}
               />
             </TabsContent>
 
@@ -371,41 +414,21 @@ const ImageEditor = () => {
           </div>
         ) : (
           <div 
-            className={`p-6 flex items-center justify-center w-full h-full overflow-auto ${
-              selectedBackground.class.startsWith('bg-gradient-to-r') || 
-              selectedBackground.class.startsWith('bg-[') 
-                ? '' 
-                : selectedBackground.class
-            }`}
+            className="p-6 flex items-center justify-center w-full h-full overflow-auto"
             style={{ 
               minHeight: "500px",
-              background: selectedBackground.class.startsWith('bg-gradient-to-r') || 
-                         selectedBackground.class.startsWith('bg-[') 
-                ? selectedBackground.class.startsWith('bg-[') 
-                  ? selectedBackground.value 
-                  : `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
-                : undefined
+              ...getBackgroundStyle()
             }}
           >
             <ContextMenu>
               <ContextMenuTrigger>
                 <div 
                   ref={resultRef}
-                  className={
-                    selectedBackground.class.startsWith('bg-gradient-to-r') || 
-                    selectedBackground.class.startsWith('bg-[') 
-                      ? '' 
-                      : selectedBackground.class
-                  }
                   style={{ 
                     padding: `${padding}px`,
                     maxWidth: "100%",
-                    background: selectedBackground.class.startsWith('bg-gradient-to-r') || 
-                              selectedBackground.class.startsWith('bg-[')
-                      ? selectedBackground.class.startsWith('bg-[') 
-                        ? selectedBackground.value 
-                        : `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
-                      : undefined
+                    position: "relative",
+                    ...getBackgroundStyle()
                   }}
                 >
                   {selectedRatio.value !== null ? (
@@ -423,25 +446,6 @@ const ImageEditor = () => {
                           transformOrigin: "center center"
                         }}
                       />
-                      {logo && (
-                        <img 
-                          src={logo} 
-                          alt="Logo" 
-                          className={`absolute ${
-                            logoPosition === "top-left" ? "top-2 left-2" :
-                            logoPosition === "top-right" ? "top-2 right-2" :
-                            logoPosition === "center-bottom" ? "bottom-2 left-1/2 -translate-x-1/2" :
-                            logoPosition === "bottom-left" ? "bottom-2 left-2" :
-                            "bottom-2 right-2"
-                          }`}
-                          style={{ 
-                            height: `${logoSize}px`,
-                            width: "auto",
-                            maxWidth: "50%",
-                            objectFit: "contain"
-                          }}
-                        />
-                      )}
                     </AspectRatio>
                   ) : (
                     <div className="relative">
@@ -458,26 +462,30 @@ const ImageEditor = () => {
                           transformOrigin: "center center"
                         }}
                       />
-                      {logo && (
-                        <img 
-                          src={logo} 
-                          alt="Logo" 
-                          className={`absolute ${
-                            logoPosition === "top-left" ? "top-2 left-2" :
-                            logoPosition === "top-right" ? "top-2 right-2" :
-                            logoPosition === "center-bottom" ? "bottom-2 left-1/2 -translate-x-1/2" :
-                            logoPosition === "bottom-left" ? "bottom-2 left-2" :
-                            "bottom-2 right-2"
-                          }`}
-                          style={{ 
-                            height: `${logoSize}px`,
-                            width: "auto",
-                            maxWidth: "50%",
-                            objectFit: "contain"
-                          }}
-                        />
-                      )}
                     </div>
+                  )}
+                  
+                  {/* Logo placed in the padding area */}
+                  {logo && (
+                    <img 
+                      src={logo} 
+                      alt="Logo" 
+                      className="absolute"
+                      style={{ 
+                        height: `${logoSize}px`,
+                        width: "auto",
+                        maxWidth: "50%",
+                        objectFit: "contain",
+                        top: logoPosition === "top-left" ? "0" : 
+                             logoPosition === "top-right" ? "0" : 
+                             "auto",
+                        bottom: logoPosition === "bottom-left" || logoPosition === "bottom-right" || logoPosition === "center-bottom" ? "0" : "auto",
+                        left: logoPosition === "top-left" || logoPosition === "bottom-left" ? "0" : 
+                              logoPosition === "center-bottom" ? "50%" : "auto",
+                        right: logoPosition === "top-right" || logoPosition === "bottom-right" ? "0" : "auto",
+                        transform: logoPosition === "center-bottom" ? "translateX(-50%)" : "none"
+                      }}
+                    />
                   )}
                 </div>
               </ContextMenuTrigger>

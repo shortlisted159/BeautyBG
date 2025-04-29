@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Palette } from "lucide-react";
+import { Palette, Upload } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type Background = {
@@ -53,27 +53,29 @@ interface GradientSelectorProps {
   onSelectBackground: (background: Background) => void;
   backgroundType: BackgroundType;
   onBackgroundTypeChange: (type: BackgroundType) => void;
+  onBackgroundImageSelect?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  backgroundImageInputRef?: React.RefObject<HTMLInputElement>;
 }
 
 const GradientSelector: React.FC<GradientSelectorProps> = ({ 
   selectedBackground,
   onSelectBackground,
   backgroundType,
-  onBackgroundTypeChange
+  onBackgroundTypeChange,
+  onBackgroundImageSelect,
+  backgroundImageInputRef,
 }) => {
   const [color1, setColor1] = useState("#ff758c");
   const [color2, setColor2] = useState("#ff7eb3");
-  const [customGradients, setCustomGradients] = useState<Background[]>([]);
   const [plainColor, setPlainColor] = useState("#50b7f5");
-  const allGradients = [...defaultGradients, ...customGradients];
   
   const handleCreateCustomGradient = () => {
     const newCustomGradient: Background = {
-      name: `Custom ${customGradients.length + 1}`,
+      name: `Custom`,
       value: `${color1},${color2}`,
       class: `bg-gradient-to-r from-[${color1}] to-[${color2}]`
     };
-    setCustomGradients([...customGradients, newCustomGradient]);
+    // Apply the gradient immediately without adding to list
     onSelectBackground(newCustomGradient);
   };
 
@@ -139,92 +141,99 @@ const GradientSelector: React.FC<GradientSelectorProps> = ({
       )}
 
       {backgroundType === "gradient" && (
-        <div className="grid grid-cols-5 gap-2">
-          {allGradients.map((bg) => (
-            <button
-              key={bg.name}
-              className={`${bg.class} h-12 rounded-md border-2 transition-all ${
-                selectedBackground.name === bg.name
-                  ? "border-primary scale-110 shadow-md"
-                  : "border-transparent hover:scale-105"
-              }`}
-              title={bg.name}
-              onClick={() => onSelectBackground(bg)}
-            />
-          ))}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="h-12 border-dashed border-2"
-              >
-                <Palette className="h-5 w-5" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64">
-              <div className="space-y-3">
-                <h4 className="font-medium">Custom Gradient</h4>
-                <div className="space-y-2">
-                  <Label>Start Color</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      type="color" 
-                      value={color1} 
-                      onChange={(e) => setColor1(e.target.value)}
-                      className="w-12 p-1 h-8"
-                    />
-                    <Input 
-                      type="text" 
-                      value={color1} 
-                      onChange={(e) => setColor1(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>End Color</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      type="color" 
-                      value={color2} 
-                      onChange={(e) => setColor2(e.target.value)}
-                      className="w-12 p-1 h-8"
-                    />
-                    <Input 
-                      type="text" 
-                      value={color2} 
-                      onChange={(e) => setColor2(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div 
-                  className="h-8 rounded-md w-full"
-                  style={{
-                    background: `linear-gradient(to right, ${color1}, ${color2})`
-                  }}
-                />
+        <>
+          <div className="grid grid-cols-5 gap-2">
+            {defaultGradients.map((bg) => (
+              <button
+                key={bg.name}
+                className={`${bg.class} h-12 rounded-md border-2 transition-all ${
+                  selectedBackground.name === bg.name
+                    ? "border-primary scale-110 shadow-md"
+                    : "border-transparent hover:scale-105"
+                }`}
+                title={bg.name}
+                onClick={() => onSelectBackground(bg)}
+              />
+            ))}
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button 
-                  className="w-full" 
-                  onClick={handleCreateCustomGradient}
+                  variant="outline" 
+                  className="h-12 border-dashed border-2"
                 >
-                  Add Gradient
+                  <Palette className="h-5 w-5" />
                 </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-64">
+                <div className="space-y-3">
+                  <h4 className="font-medium">Custom Gradient</h4>
+                  <div className="space-y-2">
+                    <Label>Start Color</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        type="color" 
+                        value={color1} 
+                        onChange={(e) => setColor1(e.target.value)}
+                        className="w-12 p-1 h-8"
+                      />
+                      <Input 
+                        type="text" 
+                        value={color1} 
+                        onChange={(e) => setColor1(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>End Color</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        type="color" 
+                        value={color2} 
+                        onChange={(e) => setColor2(e.target.value)}
+                        className="w-12 p-1 h-8"
+                      />
+                      <Input 
+                        type="text" 
+                        value={color2} 
+                        onChange={(e) => setColor2(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div 
+                    className="h-8 rounded-md w-full"
+                    style={{
+                      background: `linear-gradient(to right, ${color1}, ${color2})`
+                    }}
+                  />
+                  <Button 
+                    className="w-full" 
+                    onClick={handleCreateCustomGradient}
+                  >
+                    Apply Gradient
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </>
       )}
 
       {backgroundType === "image" && (
         <div className="space-y-3">
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => backgroundImageInputRef?.current?.click()}
+          >
+            <Upload className="mr-2 h-4 w-4" /> Choose Background Image
+          </Button>
           <Input
+            ref={backgroundImageInputRef}
             type="file"
             accept="image/*"
-            className="cursor-pointer"
+            className="hidden"
+            onChange={onBackgroundImageSelect}
           />
-          <p className="text-sm text-muted-foreground">or</p>
-          <Button variant="outline" className="w-full">
-            Select from gallery
-          </Button>
         </div>
       )}
     </div>
