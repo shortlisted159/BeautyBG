@@ -7,14 +7,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { Upload, Image as ImageIcon, ImagePlus, Download, Crop } from "lucide-react";
-
-type Background = {
-  name: string;
-  value: string;
-  class: string;
-};
+import { Upload, Image as ImageIcon, ImagePlus, Download } from "lucide-react";
+import GradientSelector, { Background } from "./GradientSelector";
+import { SocialTemplate, socialTemplates } from "@/types/SocialTemplates";
 
 const backgrounds: Background[] = [
   { name: "Beach", value: "#00d2ff,#3a7bd5", class: "bg-gradient-beach" },
@@ -38,6 +47,8 @@ const ratios = [
   { name: "9:16", value: 9/16 },
 ];
 
+type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center-bottom";
+
 const ImageEditor = () => {
   const [image, setImage] = useState<string | null>(null);
   const [logo, setLogo] = useState<string | null>(null);
@@ -46,9 +57,10 @@ const ImageEditor = () => {
   const [shadow, setShadow] = useState<number>(27);
   const [selectedBackground, setSelectedBackground] = useState<Background>(backgrounds[0]);
   const [logoSize, setLogoSize] = useState<number>(50);
-  const [logoPosition, setLogoPosition] = useState<"bottom-right" | "bottom-left" | "top-right" | "top-left" | "center-bottom">("bottom-right");
+  const [logoPosition, setLogoPosition] = useState<LogoPosition>("bottom-right");
   const [selectedRatio, setSelectedRatio] = useState<{ name: string; value: number | null }>(ratios[0]);
-
+  const [inset, setInset] = useState<boolean>(false);
+  
   const imageInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -122,14 +134,29 @@ const ImageEditor = () => {
     });
   };
 
+  // Apply social media template
+  const applyTemplate = (template: SocialTemplate) => {
+    setPadding(template.padding);
+    setBorderRadius(template.borderRadius);
+    setShadow(template.shadow);
+    setInset(template.inset);
+    if (template.aspectRatio !== null) {
+      const matchingRatio = ratios.find(r => r.value === template.aspectRatio) || 
+                           { name: `Custom ${template.aspectRatio}`, value: template.aspectRatio };
+      setSelectedRatio(matchingRatio);
+    }
+    toast.success(`Applied ${template.name} template`);
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full max-w-7xl mx-auto p-4 md:p-6 animate-fade-in">
       <Card className="md:w-1/3 space-y-4">
         <CardContent className="pt-6">
           <Tabs defaultValue="upload" className="w-full">
-            <TabsList className="grid grid-cols-2 mb-4">
+            <TabsList className="grid grid-cols-3 mb-4">
               <TabsTrigger value="upload">Upload</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
             </TabsList>
             
             <TabsContent value="upload" className="space-y-4">
@@ -188,51 +215,22 @@ const ImageEditor = () => {
                   />
                   
                   <Label className="mt-2">Logo Position</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button
-                      variant={logoPosition === "top-left" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setLogoPosition("top-left")}
-                      className="text-xs"
+                  <div className="grid grid-cols-1 gap-2">
+                    <Select
+                      value={logoPosition}
+                      onValueChange={(value) => setLogoPosition(value as LogoPosition)}
                     >
-                      Top Left
-                    </Button>
-                    <div />
-                    <Button
-                      variant={logoPosition === "top-right" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setLogoPosition("top-right")}
-                      className="text-xs"
-                    >
-                      Top Right
-                    </Button>
-                    <div />
-                    <Button
-                      variant={logoPosition === "center-bottom" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setLogoPosition("center-bottom")}
-                      className="text-xs"
-                    >
-                      Bottom
-                    </Button>
-                    <div />
-                    <Button
-                      variant={logoPosition === "bottom-left" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setLogoPosition("bottom-left")}
-                      className="text-xs"
-                    >
-                      Bottom Left
-                    </Button>
-                    <div />
-                    <Button
-                      variant={logoPosition === "bottom-right" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setLogoPosition("bottom-right")}
-                      className="text-xs"
-                    >
-                      Bottom Right
-                    </Button>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select position" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="top-left">Top Left</SelectItem>
+                        <SelectItem value="top-right">Top Right</SelectItem>
+                        <SelectItem value="center-bottom">Bottom Center</SelectItem>
+                        <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                        <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               )}
@@ -271,6 +269,17 @@ const ImageEditor = () => {
                   onValueChange={([value]) => setShadow(value)}
                 />
               </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="inset-shadow"
+                  checked={inset}
+                  onChange={(e) => setInset(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <Label htmlFor="inset-shadow">Inset Shadow</Label>
+              </div>
               
               <div className="space-y-2">
                 <Label>Aspect Ratio</Label>
@@ -289,22 +298,31 @@ const ImageEditor = () => {
                 </div>
               </div>
               
+              <GradientSelector 
+                selectedBackground={selectedBackground} 
+                onSelectBackground={setSelectedBackground} 
+              />
+            </TabsContent>
+
+            <TabsContent value="templates" className="space-y-4">
               <div className="space-y-2">
-                <Label>Background</Label>
-                <div className="grid grid-cols-5 gap-2">
-                  {backgrounds.map((bg) => (
-                    <button
-                      key={bg.name}
-                      className={`${bg.class} h-12 rounded-md border-2 transition-all ${
-                        selectedBackground.name === bg.name
-                          ? "border-primary scale-110 shadow-md"
-                          : "border-transparent hover:scale-105"
-                      }`}
-                      title={bg.name}
-                      onClick={() => setSelectedBackground(bg)}
-                    />
+                <Label>Social Media Templates</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {socialTemplates.map((template) => (
+                    <Button
+                      key={template.name}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => applyTemplate(template)}
+                      className="text-xs h-10"
+                    >
+                      {template.name}
+                    </Button>
                   ))}
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Click to apply preset settings for different platforms
+                </p>
               </div>
             </TabsContent>
           </Tabs>
@@ -337,11 +355,14 @@ const ImageEditor = () => {
           >
             <div 
               ref={resultRef}
-              className={`${selectedBackground.class} p-${padding} relative`}
               style={{ 
                 padding: `${padding}px`,
-                maxWidth: "100%"
+                maxWidth: "100%",
+                background: selectedBackground.class.startsWith('bg-gradient-to-r') 
+                  ? `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
+                  : undefined
               }}
+              className={selectedBackground.class.startsWith('bg-gradient-to-r') ? '' : selectedBackground.class}
             >
               {selectedRatio.value !== null ? (
                 <AspectRatio ratio={selectedRatio.value} className="relative">
@@ -351,7 +372,9 @@ const ImageEditor = () => {
                     className="w-full h-full object-cover"
                     style={{
                       borderRadius: `${borderRadius}px`,
-                      boxShadow: shadow > 0 ? `0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})` : "none",
+                      boxShadow: inset 
+                        ? `inset 0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`
+                        : `0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`,
                     }}
                   />
                   {logo && (
@@ -382,7 +405,9 @@ const ImageEditor = () => {
                     className="w-full h-auto"
                     style={{
                       borderRadius: `${borderRadius}px`,
-                      boxShadow: shadow > 0 ? `0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})` : "none",
+                      boxShadow: inset 
+                        ? `inset 0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`
+                        : `0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`,
                     }}
                   />
                   {logo && (
