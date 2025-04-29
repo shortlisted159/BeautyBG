@@ -21,9 +21,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { Upload, Image as ImageIcon, ImagePlus, Download } from "lucide-react";
-import GradientSelector, { Background } from "./GradientSelector";
+import { Upload, Image as ImageIcon, ImagePlus, Download, Crop } from "lucide-react";
+import GradientSelector, { Background, BackgroundType } from "./GradientSelector";
 import { SocialTemplate, socialTemplates } from "@/types/SocialTemplates";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 const backgrounds: Background[] = [
   { name: "Beach", value: "#00d2ff,#3a7bd5", class: "bg-gradient-beach" },
@@ -56,10 +62,12 @@ const ImageEditor = () => {
   const [borderRadius, setBorderRadius] = useState<number>(20);
   const [shadow, setShadow] = useState<number>(27);
   const [selectedBackground, setSelectedBackground] = useState<Background>(backgrounds[0]);
+  const [backgroundType, setBackgroundType] = useState<BackgroundType>("gradient");
   const [logoSize, setLogoSize] = useState<number>(50);
   const [logoPosition, setLogoPosition] = useState<LogoPosition>("bottom-right");
   const [selectedRatio, setSelectedRatio] = useState<{ name: string; value: number | null }>(ratios[0]);
   const [inset, setInset] = useState<boolean>(false);
+  const [imageSize, setImageSize] = useState<number>(100); // Added for image size control (percentage)
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -142,7 +150,7 @@ const ImageEditor = () => {
     setInset(template.inset);
     if (template.aspectRatio !== null) {
       const matchingRatio = ratios.find(r => r.value === template.aspectRatio) || 
-                           { name: `Custom ${template.aspectRatio}`, value: template.aspectRatio };
+                          { name: `Custom ${template.aspectRatio}`, value: template.aspectRatio };
       setSelectedRatio(matchingRatio);
     }
     toast.success(`Applied ${template.name} template`);
@@ -237,6 +245,19 @@ const ImageEditor = () => {
             </TabsContent>
             
             <TabsContent value="settings" className="space-y-4">
+              {image && (
+                <div className="space-y-2">
+                  <Label>Image Size: {imageSize}%</Label>
+                  <Slider
+                    value={[imageSize]}
+                    min={30}
+                    max={150}
+                    step={1}
+                    onValueChange={([value]) => setImageSize(value)}
+                  />
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Label>Padding: {padding}px</Label>
                 <Slider
@@ -300,7 +321,9 @@ const ImageEditor = () => {
               
               <GradientSelector 
                 selectedBackground={selectedBackground} 
-                onSelectBackground={setSelectedBackground} 
+                onSelectBackground={setSelectedBackground}
+                backgroundType={backgroundType}
+                onBackgroundTypeChange={setBackgroundType}
               />
             </TabsContent>
 
@@ -351,87 +374,108 @@ const ImageEditor = () => {
             className={`${selectedBackground.class} p-6 flex items-center justify-center w-full h-full overflow-auto`}
             style={{ 
               minHeight: "500px", 
+              background: selectedBackground.class.startsWith('bg-gradient-to-r') || selectedBackground.class.startsWith('bg-[') 
+                ? selectedBackground.class.startsWith('bg-[') 
+                  ? selectedBackground.value 
+                  : `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
+                : undefined
             }}
+            className={selectedBackground.class.startsWith('bg-gradient-to-r') || selectedBackground.class.startsWith('bg-[') ? '' : selectedBackground.class}
           >
-            <div 
-              ref={resultRef}
-              style={{ 
-                padding: `${padding}px`,
-                maxWidth: "100%",
-                background: selectedBackground.class.startsWith('bg-gradient-to-r') 
-                  ? `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
-                  : undefined
-              }}
-              className={selectedBackground.class.startsWith('bg-gradient-to-r') ? '' : selectedBackground.class}
-            >
-              {selectedRatio.value !== null ? (
-                <AspectRatio ratio={selectedRatio.value} className="relative">
-                  <img
-                    src={image}
-                    alt="Uploaded screenshot"
-                    className="w-full h-full object-cover"
-                    style={{
-                      borderRadius: `${borderRadius}px`,
-                      boxShadow: inset 
-                        ? `inset 0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`
-                        : `0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`,
-                    }}
-                  />
-                  {logo && (
-                    <img 
-                      src={logo} 
-                      alt="Logo" 
-                      className={`absolute ${
-                        logoPosition === "top-left" ? "top-2 left-2" :
-                        logoPosition === "top-right" ? "top-2 right-2" :
-                        logoPosition === "center-bottom" ? "bottom-2 left-1/2 -translate-x-1/2" :
-                        logoPosition === "bottom-left" ? "bottom-2 left-2" :
-                        "bottom-2 right-2"
-                      }`}
-                      style={{ 
-                        height: `${logoSize}px`,
-                        width: "auto",
-                        maxWidth: "50%",
-                        objectFit: "contain"
-                      }}
-                    />
-                  )}
-                </AspectRatio>
-              ) : (
-                <div className="relative">
-                  <img
-                    src={image}
-                    alt="Uploaded screenshot"
-                    className="w-full h-auto"
-                    style={{
-                      borderRadius: `${borderRadius}px`,
-                      boxShadow: inset 
-                        ? `inset 0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`
-                        : `0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`,
-                    }}
-                  />
-                  {logo && (
-                    <img 
-                      src={logo} 
-                      alt="Logo" 
-                      className={`absolute ${
-                        logoPosition === "top-left" ? "top-2 left-2" :
-                        logoPosition === "top-right" ? "top-2 right-2" :
-                        logoPosition === "center-bottom" ? "bottom-2 left-1/2 -translate-x-1/2" :
-                        logoPosition === "bottom-left" ? "bottom-2 left-2" :
-                        "bottom-2 right-2"
-                      }`}
-                      style={{ 
-                        height: `${logoSize}px`,
-                        width: "auto",
-                        maxWidth: "50%",
-                        objectFit: "contain"
-                      }}
-                    />
+            <ContextMenu>
+              <ContextMenuTrigger>
+                <div 
+                  ref={resultRef}
+                  style={{ 
+                    padding: `${padding}px`,
+                    maxWidth: "100%",
+                    background: selectedBackground.class.startsWith('bg-gradient-to-r') || selectedBackground.class.startsWith('bg-[')
+                      ? selectedBackground.class.startsWith('bg-[') 
+                        ? selectedBackground.value 
+                        : `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
+                      : undefined
+                  }}
+                  className={selectedBackground.class.startsWith('bg-gradient-to-r') || selectedBackground.class.startsWith('bg-[') ? '' : selectedBackground.class}
+                >
+                  {selectedRatio.value !== null ? (
+                    <AspectRatio ratio={selectedRatio.value} className="relative">
+                      <img
+                        src={image}
+                        alt="Uploaded screenshot"
+                        className="w-full h-full object-cover"
+                        style={{
+                          borderRadius: `${borderRadius}px`,
+                          boxShadow: inset 
+                            ? `inset 0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`
+                            : `0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`,
+                          transform: `scale(${imageSize/100})`,
+                          transformOrigin: "center center"
+                        }}
+                      />
+                      {logo && (
+                        <img 
+                          src={logo} 
+                          alt="Logo" 
+                          className={`absolute ${
+                            logoPosition === "top-left" ? "top-2 left-2" :
+                            logoPosition === "top-right" ? "top-2 right-2" :
+                            logoPosition === "center-bottom" ? "bottom-2 left-1/2 -translate-x-1/2" :
+                            logoPosition === "bottom-left" ? "bottom-2 left-2" :
+                            "bottom-2 right-2"
+                          }`}
+                          style={{ 
+                            height: `${logoSize}px`,
+                            width: "auto",
+                            maxWidth: "50%",
+                            objectFit: "contain"
+                          }}
+                        />
+                      )}
+                    </AspectRatio>
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={image}
+                        alt="Uploaded screenshot"
+                        className="w-full h-auto"
+                        style={{
+                          borderRadius: `${borderRadius}px`,
+                          boxShadow: inset 
+                            ? `inset 0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`
+                            : `0 ${shadow/3}px ${shadow}px rgba(0,0,0,${shadow/100})`,
+                          transform: `scale(${imageSize/100})`,
+                          transformOrigin: "center center"
+                        }}
+                      />
+                      {logo && (
+                        <img 
+                          src={logo} 
+                          alt="Logo" 
+                          className={`absolute ${
+                            logoPosition === "top-left" ? "top-2 left-2" :
+                            logoPosition === "top-right" ? "top-2 right-2" :
+                            logoPosition === "center-bottom" ? "bottom-2 left-1/2 -translate-x-1/2" :
+                            logoPosition === "bottom-left" ? "bottom-2 left-2" :
+                            "bottom-2 right-2"
+                          }`}
+                          style={{ 
+                            height: `${logoSize}px`,
+                            width: "auto",
+                            maxWidth: "50%",
+                            objectFit: "contain"
+                          }}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={() => setImageSize(100)}>Reset Image Size</ContextMenuItem>
+                <ContextMenuItem onClick={() => setImageSize(Math.min(imageSize + 10, 150))}>Increase Size</ContextMenuItem>
+                <ContextMenuItem onClick={() => setImageSize(Math.max(imageSize - 10, 30))}>Decrease Size</ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           </div>
         )}
       </div>
