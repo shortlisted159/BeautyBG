@@ -67,9 +67,18 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
     );
   }
 
-  // Prepare proper styles for the container
-  const containerStyle = {
-    ...backgroundStyle,
+  // Define styles for the image container
+  const imageStyles = {
+    borderRadius: `${borderRadius}px`,
+    boxShadow: inset
+      ? `inset 0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`
+      : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`,
+    transform: `scale(${imageSize / 100})`,
+    transformOrigin: "center center",
+    display: "block", // Ensure we treat it as a block element
+    width: "100%",
+    height: "100%",
+    objectFit: "cover" as const,
   };
 
   return (
@@ -77,7 +86,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
       className="p-6 flex items-center justify-center w-full h-full overflow-auto"
       style={{
         minHeight: "500px",
-        ...containerStyle,
+        ...backgroundStyle,
       }}
     >
       <ContextMenu>
@@ -88,24 +97,15 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
               padding: `${padding}px`,
               maxWidth: "100%",
               position: "relative",
-              ...backgroundStyle,
             }}
           >
             <div className="relative">
               {selectedRatio.value !== null ? (
-                <AspectRatio ratio={selectedRatio.value}>
+                <AspectRatio ratio={selectedRatio.value} className="overflow-hidden">
                   <img
                     src={image}
                     alt="Uploaded screenshot"
-                    className="w-full h-full object-cover"
-                    style={{
-                      borderRadius: `${borderRadius}px`,
-                      boxShadow: inset
-                        ? `inset 0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`
-                        : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`,
-                      transform: `scale(${imageSize / 100})`,
-                      transformOrigin: "center center",
-                    }}
+                    style={imageStyles}
                   />
                 </AspectRatio>
               ) : (
@@ -113,19 +113,12 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
                   src={image}
                   alt="Uploaded screenshot"
                   className="w-full h-auto"
-                  style={{
-                    borderRadius: `${borderRadius}px`,
-                    boxShadow: inset
-                      ? `inset 0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`
-                      : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`,
-                    transform: `scale(${imageSize / 100})`,
-                    transformOrigin: "center center",
-                  }}
+                  style={imageStyles}
                 />
               )}
             </div>
 
-            {/* Logo placed in the padding area */}
+            {/* Logo positioned in the padding area outside the image */}
             {logo && (
               <img
                 src={logo}

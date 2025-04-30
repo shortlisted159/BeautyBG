@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Background } from "../GradientSelector";
@@ -75,6 +74,7 @@ const ImageEditor = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         setBackgroundImage(event.target?.result as string);
+        setBackgroundType("image");
         toast.success("Background image uploaded successfully!");
       };
       reader.readAsDataURL(file);
@@ -123,19 +123,30 @@ const ImageEditor = () => {
 
   // Handle export
   const handleExport = () => {
-    if (!resultRef.current) return;
+    if (!resultRef.current || !image) {
+      toast.error("No image to export");
+      return;
+    }
 
     // @ts-ignore - html2canvas is loaded dynamically so TypeScript doesn't know about it
-    html2canvas(resultRef.current, {
-      backgroundColor: selectedBackground.value === "transparent" ? null : undefined,
-      scale: 2,
-    }).then((canvas: HTMLCanvasElement) => {
-      const link = document.createElement("a");
-      link.download = "screenshot-sparkle.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-      toast.success("Image exported successfully!");
-    });
+    if (typeof window.html2canvas === 'function') {
+      // @ts-ignore
+      window.html2canvas(resultRef.current, {
+        backgroundColor: selectedBackground.value === "transparent" ? null : undefined,
+        scale: 2,
+      }).then((canvas: HTMLCanvasElement) => {
+        const link = document.createElement("a");
+        link.download = "screenshot-sparkle.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        toast.success("Image exported successfully!");
+      }).catch((error: any) => {
+        console.error("Export error:", error);
+        toast.error("Failed to export image");
+      });
+    } else {
+      toast.error("Export functionality is not available. Please try again later.");
+    }
   };
 
   // Apply social media template
@@ -146,14 +157,14 @@ const ImageEditor = () => {
     setInset(template.inset);
     
     // Find matching ratio or keep current if not found
-    if (template.aspectRatio !== null) {
-      const matchingRatio = ratios.find(r => r.value === template.aspectRatio);
-      if (matchingRatio) {
-        setSelectedRatio(matchingRatio);
-      } else {
-        setSelectedRatio({ name: `Custom ${template.aspectRatio}`, value: template.aspectRatio });
-      }
-    }
+    setSelectedRatio(
+      template.aspectRatio === null 
+        ? ratios[0] // Original
+        : { 
+            name: `Custom ${template.aspectRatio}`,
+            value: template.aspectRatio
+          }
+    );
   };
 
   // Get background style based on selected type
