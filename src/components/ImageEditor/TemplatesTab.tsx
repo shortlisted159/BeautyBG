@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SocialTemplate } from "@/types/SocialTemplates";
+import { toast } from "sonner";
 
 interface TemplatesTabProps {
   templates: SocialTemplate[];
@@ -10,6 +11,11 @@ interface TemplatesTabProps {
 }
 
 const TemplatesTab: React.FC<TemplatesTabProps> = ({ templates, applyTemplate }) => {
+  const handleApplyTemplate = (template: SocialTemplate) => {
+    applyTemplate(template);
+    toast.success(`Applied ${template.name} template`);
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -20,7 +26,7 @@ const TemplatesTab: React.FC<TemplatesTabProps> = ({ templates, applyTemplate })
               key={template.name}
               variant="outline"
               size="sm"
-              onClick={() => applyTemplate(template)}
+              onClick={() => handleApplyTemplate(template)}
               className="text-xs h-10"
             >
               {template.name}

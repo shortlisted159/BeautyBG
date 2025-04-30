@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Background } from "../GradientSelector";
@@ -153,8 +154,6 @@ const ImageEditor = () => {
         setSelectedRatio({ name: `Custom ${template.aspectRatio}`, value: template.aspectRatio });
       }
     }
-    
-    toast.success(`Applied ${template.name} template`);
   };
 
   // Get background style based on selected type
@@ -165,17 +164,25 @@ const ImageEditor = () => {
         backgroundSize: "cover",
         backgroundPosition: "center"
       };
-    } else if (backgroundType === "plain" || selectedBackground.class.startsWith('bg-[')) {
+    } else if (backgroundType === "plain") {
       return {
-        backgroundColor: selectedBackground.value
+        backgroundColor: selectedBackground.value.includes(',') ? 
+          selectedBackground.value.split(',')[0] : selectedBackground.value
       };
-    } else if (selectedBackground.class.startsWith('bg-gradient-to-r')) {
-      return {
-        background: `linear-gradient(to right, ${selectedBackground.value.split(',')[0]}, ${selectedBackground.value.split(',')[1]})`
-      };
-    } else {
-      return {};
+    } else if (backgroundType === "gradient") {
+      // Handle gradient backgrounds
+      if (selectedBackground.value.includes(',')) {
+        const colors = selectedBackground.value.split(',');
+        return {
+          background: `linear-gradient(to right, ${colors[0]}, ${colors[1]})`
+        };
+      } else {
+        return {
+          backgroundColor: selectedBackground.value
+        };
+      }
     }
+    return {};
   };
 
   return (

@@ -67,12 +67,17 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
     );
   }
 
+  // Prepare proper styles for the container
+  const containerStyle = {
+    ...backgroundStyle,
+  };
+
   return (
     <div
       className="p-6 flex items-center justify-center w-full h-full overflow-auto"
       style={{
         minHeight: "500px",
-        ...backgroundStyle,
+        ...containerStyle,
       }}
     >
       <ContextMenu>
@@ -86,24 +91,24 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
               ...backgroundStyle,
             }}
           >
-            {selectedRatio.value !== null ? (
-              <AspectRatio ratio={selectedRatio.value} className="relative">
-                <img
-                  src={image}
-                  alt="Uploaded screenshot"
-                  className="w-full h-full object-cover"
-                  style={{
-                    borderRadius: `${borderRadius}px`,
-                    boxShadow: inset
-                      ? `inset 0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`
-                      : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`,
-                    transform: `scale(${imageSize / 100})`,
-                    transformOrigin: "center center",
-                  }}
-                />
-              </AspectRatio>
-            ) : (
-              <div className="relative">
+            <div className="relative">
+              {selectedRatio.value !== null ? (
+                <AspectRatio ratio={selectedRatio.value}>
+                  <img
+                    src={image}
+                    alt="Uploaded screenshot"
+                    className="w-full h-full object-cover"
+                    style={{
+                      borderRadius: `${borderRadius}px`,
+                      boxShadow: inset
+                        ? `inset 0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`
+                        : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`,
+                      transform: `scale(${imageSize / 100})`,
+                      transformOrigin: "center center",
+                    }}
+                  />
+                </AspectRatio>
+              ) : (
                 <img
                   src={image}
                   alt="Uploaded screenshot"
@@ -117,8 +122,8 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
                     transformOrigin: "center center",
                   }}
                 />
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Logo placed in the padding area */}
             {logo && (

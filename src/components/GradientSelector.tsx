@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Palette, Upload } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type Background = {
   name: string;
@@ -69,6 +68,17 @@ const GradientSelector: React.FC<GradientSelectorProps> = ({
   const [color2, setColor2] = useState("#ff7eb3");
   const [plainColor, setPlainColor] = useState("#50b7f5");
   
+  // Initialize plain color from selected background if needed
+  useEffect(() => {
+    if (backgroundType === "plain") {
+      if (selectedBackground.value.includes(',')) {
+        setPlainColor(selectedBackground.value.split(',')[0]);
+      } else {
+        setPlainColor(selectedBackground.value);
+      }
+    }
+  }, [backgroundType, selectedBackground]);
+
   const handleCreateCustomGradient = () => {
     const newCustomGradient: Background = {
       name: `Custom`,
@@ -146,13 +156,20 @@ const GradientSelector: React.FC<GradientSelectorProps> = ({
             {defaultGradients.map((bg) => (
               <button
                 key={bg.name}
-                className={`${bg.class} h-12 rounded-md border-2 transition-all ${
+                className={`h-12 rounded-md border-2 transition-all ${
                   selectedBackground.name === bg.name
                     ? "border-primary scale-110 shadow-md"
                     : "border-transparent hover:scale-105"
                 }`}
                 title={bg.name}
                 onClick={() => onSelectBackground(bg)}
+                style={
+                  bg.value === "transparent" 
+                    ? { backgroundImage: "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAKElEQVQYlWNgYGD4z4AEGIhUIHKKpoUCsApTQxwNKcXIUAElcxxTCgBnhgEhNLx1RQAAAABJRU5ErkJggg==', background-repeat: repeat" } 
+                    : bg.value.includes(',') 
+                      ? { background: `linear-gradient(to right, ${bg.value.split(',')[0]}, ${bg.value.split(',')[1]})` }
+                      : { backgroundColor: bg.value }
+                }
               />
             ))}
             <Popover>
