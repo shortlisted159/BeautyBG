@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Background } from "../GradientSelector";
@@ -156,15 +157,19 @@ const ImageEditor = () => {
     setShadow(template.shadow);
     setInset(template.inset);
     
-    // Find matching ratio or keep current if not found
-    setSelectedRatio(
-      template.aspectRatio === null 
-        ? ratios[0] // Original
-        : { 
-            name: `Custom ${template.aspectRatio}`,
-            value: template.aspectRatio
-          }
-    );
+    // Set the aspect ratio from the template
+    const matchingRatio = ratios.find(r => r.value === template.aspectRatio);
+    if (matchingRatio) {
+      setSelectedRatio(matchingRatio);
+    } else if (template.aspectRatio === null) {
+      setSelectedRatio(ratios[0]); // Original
+    } else {
+      // Custom ratio not in our predefined list
+      setSelectedRatio({ 
+        name: `Custom ${template.aspectRatio}:1`, 
+        value: template.aspectRatio 
+      });
+    }
   };
 
   // Get background style based on selected type
@@ -233,7 +238,7 @@ const ImageEditor = () => {
         applyTemplate={applyTemplate}
       />
       
-      <div className="md:w-2/3 rounded-lg overflow-hidden flex items-center justify-center min-h-[500px] relative">
+      <div className="md:w-2/3 rounded-lg overflow-hidden flex items-center justify-center min-h-[500px] bg-gray-50">
         <ImagePreview 
           image={image}
           logo={logo}

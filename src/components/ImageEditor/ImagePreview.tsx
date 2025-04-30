@@ -83,7 +83,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
 
   return (
     <div
-      className="p-6 flex items-center justify-center w-full h-full overflow-auto"
+      className="flex items-center justify-center w-full h-full overflow-auto"
       style={{
         minHeight: "500px",
         ...backgroundStyle,
@@ -93,21 +93,23 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
         <ContextMenuTrigger>
           <div
             ref={resultRef}
+            className="relative"
             style={{
-              padding: `${padding}px`,
-              maxWidth: "100%",
-              position: "relative",
+              maxWidth: "100%"
             }}
           >
-            <div className="relative">
+            {/* Main image container with padding */}
+            <div style={{ padding: `${padding}px` }}>
               {selectedRatio.value !== null ? (
-                <AspectRatio ratio={selectedRatio.value} className="overflow-hidden">
-                  <img
-                    src={image}
-                    alt="Uploaded screenshot"
-                    style={imageStyles}
-                  />
-                </AspectRatio>
+                <div style={{ width: '100%' }}>
+                  <AspectRatio ratio={selectedRatio.value}>
+                    <img
+                      src={image}
+                      alt="Uploaded screenshot"
+                      style={imageStyles}
+                    />
+                  </AspectRatio>
+                </div>
               ) : (
                 <img
                   src={image}
@@ -118,7 +120,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
               )}
             </div>
 
-            {/* Logo positioned in the padding area outside the image */}
+            {/* Logo positioned in the padding area */}
             {logo && (
               <img
                 src={logo}

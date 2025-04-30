@@ -22,6 +22,14 @@ const TemplatesTab: React.FC<TemplatesTabProps> = ({ templates, applyTemplate })
     }
   };
 
+  // Helper function to display aspect ratio in readable format
+  const formatAspectRatio = (ratio: number | null) => {
+    if (ratio === null) return 'Original';
+    if (ratio === 1) return '1:1';
+    if (ratio > 1) return `${Math.round(ratio*10)/10}:1`;
+    return `1:${Math.round(10/ratio)/10}`;
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -30,22 +38,19 @@ const TemplatesTab: React.FC<TemplatesTabProps> = ({ templates, applyTemplate })
           {templates.map((template) => (
             <Card 
               key={template.name}
-              className="p-2 cursor-pointer hover:border-primary transition-colors"
+              className="p-2 cursor-pointer hover:bg-secondary/10 hover:border-primary transition-colors"
               onClick={() => handleApplyTemplate(template)}
             >
               <div className="text-center mb-1 font-medium text-sm">{template.name}</div>
               <div 
                 className="bg-gray-100 rounded-md h-16 flex items-center justify-center text-xs text-gray-500"
-                style={{
-                  borderRadius: `${template.borderRadius/2}px`,
-                  boxShadow: template.shadow > 0 ? `0 ${template.shadow/4}px ${template.shadow/2}px rgba(0,0,0,0.1)` : 'none'
-                }}
               >
-                {template.aspectRatio ? 
-                  `${template.aspectRatio === 1 ? '1:1' : template.aspectRatio > 1 ? 
-                  `${Math.round(template.aspectRatio*10)/10}:1` : 
-                  `1:${Math.round(10/template.aspectRatio)/10}`}` 
-                  : 'Original'}
+                <div className="text-center">
+                  <div>{formatAspectRatio(template.aspectRatio)}</div>
+                  <div className="text-[10px] text-muted-foreground mt-1">
+                    {template.shadow > 0 ? 'Shadow' : 'No Shadow'} • {template.borderRadius}px radius
+                  </div>
+                </div>
               </div>
             </Card>
           ))}
