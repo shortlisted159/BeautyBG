@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Background } from "../GradientSelector";
-import { SocialTemplate, socialTemplates } from "@/types/SocialTemplates";
 import ImagePreview from "./ImagePreview";
 import ControlPanel from "./ControlPanel";
 import { BackgroundType } from "../GradientSelector";
@@ -24,15 +23,6 @@ const backgrounds: Background[] = [
   { name: "None", value: "transparent", class: "bg-transparent-grid" },
 ];
 
-const ratios = [
-  { name: "Original", value: null },
-  { name: "16:9", value: 16/9 },
-  { name: "4:3", value: 4/3 },
-  { name: "1:1", value: 1 },
-  { name: "3:4", value: 3/4 },
-  { name: "9:16", value: 9/16 },
-];
-
 const ImageEditor = () => {
   // State
   const [image, setImage] = useState<string | null>(null);
@@ -44,7 +34,6 @@ const ImageEditor = () => {
   const [backgroundType, setBackgroundType] = useState<BackgroundType>("gradient");
   const [logoSize, setLogoSize] = useState<number>(50);
   const [logoPosition, setLogoPosition] = useState<LogoPosition>("bottom-right");
-  const [selectedRatio, setSelectedRatio] = useState<{ name: string; value: number | null }>(ratios[0]);
   const [inset, setInset] = useState<boolean>(false);
   const [imageSize, setImageSize] = useState<number>(100);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -135,6 +124,8 @@ const ImageEditor = () => {
       window.html2canvas(resultRef.current, {
         backgroundColor: selectedBackground.value === "transparent" ? null : undefined,
         scale: 2,
+        useCORS: true,
+        allowTaint: true
       }).then((canvas: HTMLCanvasElement) => {
         const link = document.createElement("a");
         link.download = "screenshot-sparkle.png";
@@ -147,28 +138,6 @@ const ImageEditor = () => {
       });
     } else {
       toast.error("Export functionality is not available. Please try again later.");
-    }
-  };
-
-  // Apply social media template
-  const applyTemplate = (template: SocialTemplate) => {
-    setPadding(template.padding);
-    setBorderRadius(template.borderRadius);
-    setShadow(template.shadow);
-    setInset(template.inset);
-    
-    // Set the aspect ratio from the template
-    const matchingRatio = ratios.find(r => r.value === template.aspectRatio);
-    if (matchingRatio) {
-      setSelectedRatio(matchingRatio);
-    } else if (template.aspectRatio === null) {
-      setSelectedRatio(ratios[0]); // Original
-    } else {
-      // Custom ratio not in our predefined list
-      setSelectedRatio({ 
-        name: `Custom ${template.aspectRatio}:1`, 
-        value: template.aspectRatio 
-      });
     }
   };
 
@@ -227,15 +196,10 @@ const ImageEditor = () => {
         setShadow={setShadow}
         inset={inset}
         setInset={setInset}
-        selectedRatio={selectedRatio}
-        setSelectedRatio={setSelectedRatio}
-        ratios={ratios}
         selectedBackground={selectedBackground}
         setSelectedBackground={setSelectedBackground}
         backgroundType={backgroundType}
         setBackgroundType={setBackgroundType}
-        socialTemplates={socialTemplates}
-        applyTemplate={applyTemplate}
       />
       
       <div className="md:w-2/3 rounded-lg overflow-hidden flex items-center justify-center min-h-[500px] bg-gray-50">
@@ -246,7 +210,6 @@ const ImageEditor = () => {
           borderRadius={borderRadius}
           shadow={shadow}
           inset={inset}
-          selectedRatio={selectedRatio}
           logoSize={logoSize}
           logoPosition={logoPosition}
           imageSize={imageSize}

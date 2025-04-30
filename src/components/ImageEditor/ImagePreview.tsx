@@ -1,6 +1,5 @@
 
 import React from "react";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -17,7 +16,6 @@ interface ImagePreviewProps {
   borderRadius: number;
   shadow: number;
   inset: boolean;
-  selectedRatio: { name: string; value: number | null };
   logoSize: number;
   logoPosition: LogoPosition;
   imageSize: number;
@@ -33,7 +31,6 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
   borderRadius,
   shadow,
   inset,
-  selectedRatio,
   logoSize,
   logoPosition,
   imageSize,
@@ -77,8 +74,8 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
     transformOrigin: "center center",
     display: "block", // Ensure we treat it as a block element
     width: "100%",
-    height: "100%",
-    objectFit: "cover" as const,
+    height: "auto",
+    objectFit: "contain" as const,
   };
 
   return (
@@ -100,24 +97,12 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
           >
             {/* Main image container with padding */}
             <div style={{ padding: `${padding}px` }}>
-              {selectedRatio.value !== null ? (
-                <div style={{ width: '100%' }}>
-                  <AspectRatio ratio={selectedRatio.value}>
-                    <img
-                      src={image}
-                      alt="Uploaded screenshot"
-                      style={imageStyles}
-                    />
-                  </AspectRatio>
-                </div>
-              ) : (
-                <img
-                  src={image}
-                  alt="Uploaded screenshot"
-                  className="w-full h-auto"
-                  style={imageStyles}
-                />
-              )}
+              <img
+                src={image}
+                alt="Uploaded screenshot"
+                className="w-full h-auto"
+                style={imageStyles}
+              />
             </div>
 
             {/* Logo positioned in the padding area */}

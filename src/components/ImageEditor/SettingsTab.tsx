@@ -17,9 +17,6 @@ interface SettingsTabProps {
   setShadow: (shadow: number) => void;
   inset: boolean;
   setInset: (inset: boolean) => void;
-  selectedRatio: { name: string; value: number | null };
-  setSelectedRatio: (ratio: { name: string; value: number | null }) => void;
-  ratios: { name: string; value: number | null }[];
   selectedBackground: Background;
   setSelectedBackground: (background: Background) => void;
   backgroundType: BackgroundType;
@@ -40,9 +37,6 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
   setShadow,
   inset,
   setInset,
-  selectedRatio,
-  setSelectedRatio,
-  ratios,
   selectedBackground,
   setSelectedBackground,
   backgroundType,
@@ -107,23 +101,6 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
           className="h-4 w-4 rounded border-gray-300"
         />
         <Label htmlFor="inset-shadow">Inset Shadow</Label>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Aspect Ratio</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {ratios.map((ratio) => (
-            <Button
-              key={ratio.name}
-              variant={selectedRatio.name === ratio.name ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedRatio(ratio)}
-              className="text-xs"
-            >
-              {ratio.name}
-            </Button>
-          ))}
-        </div>
       </div>
 
       <GradientSelector
