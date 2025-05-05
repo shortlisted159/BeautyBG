@@ -66,21 +66,24 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
 
       <div className="space-y-2 mb-2">
         <div className="flex items-center justify-between">
-          <Label>Padding</Label>
+          <Label htmlFor="show-padding">Padding</Label>
           <Switch 
             id="show-padding"
             checked={showPadding}
-            onCheckedChange={setShowPadding}
+            onCheckedChange={(checked) => setShowPadding(checked)}
           />
         </div>
         {showPadding && (
-          <Slider
-            value={[padding]}
-            min={0}
-            max={120}
-            step={4}
-            onValueChange={([value]) => setPadding(value)}
-          />
+          <>
+            <Label className="text-xs text-muted-foreground">Padding size: {padding}px</Label>
+            <Slider
+              value={[padding]}
+              min={0}
+              max={120}
+              step={4}
+              onValueChange={([value]) => setPadding(value)}
+            />
+          </>
         )}
       </div>
 

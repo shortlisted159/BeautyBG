@@ -66,7 +66,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
     );
   }
 
-  // Define styles for the image container
+  // Define styles for the image container - no additional frame/border
   const imageStyles = {
     borderRadius: `${borderRadius}px`,
     boxShadow: inset
@@ -81,8 +81,10 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
 
   // Apply padding conditionally
   const containerStyles = {
-    maxWidth: "100%",
-    padding: showPadding ? `${padding}px` : 0
+    maxWidth: "100%", 
+    padding: showPadding ? `${padding}px` : 0,
+    lineHeight: 0, // Remove extra space below image
+    display: "inline-block" // Prevent container from expanding beyond image
   };
 
   return (

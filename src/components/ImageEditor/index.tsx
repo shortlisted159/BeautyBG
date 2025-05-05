@@ -167,6 +167,8 @@ const ImageEditor = () => {
         : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`;
       imgElement.style.transform = `scale(${imageSize / 100})`;
       imgElement.style.transformOrigin = "center center";
+      imgElement.style.lineHeight = "0";
+      imgElement.style.display = "block";
       
       previewContainer.appendChild(imgElement);
       
@@ -296,7 +298,7 @@ const ImageEditor = () => {
         setBackgroundType={setBackgroundType}
       />
       
-      <div className="md:w-2/3 rounded-lg overflow-hidden flex items-center justify-center min-h-[500px] bg-gray-50">
+      <div className="md:w-2/3 rounded-lg overflow-hidden flex items-center justify-center min-h-[500px] bg-gray-50 dark:bg-gray-900">
         <ImagePreview 
           image={image}
           logo={logo}
