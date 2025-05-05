@@ -28,6 +28,7 @@ const ImageEditor = () => {
   const [image, setImage] = useState<string | null>(null);
   const [logo, setLogo] = useState<string | null>(null);
   const [padding, setPadding] = useState<number>(48);
+  const [showPadding, setShowPadding] = useState<boolean>(true);
   const [borderRadius, setBorderRadius] = useState<number>(20);
   const [shadow, setShadow] = useState<number>(27);
   const [selectedBackground, setSelectedBackground] = useState<Background>(backgrounds[0]);
@@ -130,7 +131,11 @@ const ImageEditor = () => {
       // Create the container that will match our preview
       const previewContainer = document.createElement("div");
       previewContainer.style.position = "relative";
-      previewContainer.style.padding = `${padding}px`;
+      
+      // Only apply padding if showPadding is true
+      if (showPadding) {
+        previewContainer.style.padding = `${padding}px`;
+      }
       
       // Apply correct background based on type
       if (backgroundType === "image" && backgroundImage) {
@@ -165,8 +170,8 @@ const ImageEditor = () => {
       
       previewContainer.appendChild(imgElement);
       
-      // Add logo if present
-      if (logo) {
+      // Add logo if present and padding is shown
+      if (logo && showPadding) {
         const logoImg = document.createElement("img");
         logoImg.src = logo;
         logoImg.style.position = "absolute";
@@ -277,6 +282,8 @@ const ImageEditor = () => {
         setImageSize={setImageSize}
         padding={padding}
         setPadding={setPadding}
+        showPadding={showPadding}
+        setShowPadding={setShowPadding}
         borderRadius={borderRadius}
         setBorderRadius={setBorderRadius}
         shadow={shadow}
@@ -294,6 +301,7 @@ const ImageEditor = () => {
           image={image}
           logo={logo}
           padding={padding}
+          showPadding={showPadding}
           borderRadius={borderRadius}
           shadow={shadow}
           inset={inset}

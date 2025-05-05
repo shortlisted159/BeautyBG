@@ -13,6 +13,7 @@ interface ImagePreviewProps {
   image: string | null;
   logo: string | null;
   padding: number;
+  showPadding: boolean;
   borderRadius: number;
   shadow: number;
   inset: boolean;
@@ -28,6 +29,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
   image,
   logo,
   padding,
+  showPadding,
   borderRadius,
   shadow,
   inset,
@@ -77,6 +79,12 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
     objectFit: "contain" as const,
   };
 
+  // Apply padding conditionally
+  const containerStyles = {
+    maxWidth: "100%",
+    padding: showPadding ? `${padding}px` : 0
+  };
+
   return (
     <div
       className="flex items-center justify-center w-full h-full overflow-auto"
@@ -90,10 +98,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
           <div
             ref={resultRef}
             className="relative"
-            style={{
-              maxWidth: "100%",
-              padding: `${padding}px`
-            }}
+            style={containerStyles}
           >
             <img
               src={image}
@@ -103,7 +108,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
             />
 
             {/* Logo positioned in the padding area */}
-            {logo && (
+            {logo && showPadding && (
               <img
                 src={logo}
                 alt="Logo"

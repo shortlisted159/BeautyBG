@@ -3,6 +3,7 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import GradientSelector, { Background, BackgroundType } from "../GradientSelector";
 
 interface SettingsTabProps {
@@ -11,6 +12,8 @@ interface SettingsTabProps {
   setImageSize: (size: number) => void;
   padding: number;
   setPadding: (padding: number) => void;
+  showPadding: boolean;
+  setShowPadding: (show: boolean) => void;
   borderRadius: number;
   setBorderRadius: (borderRadius: number) => void;
   shadow: number;
@@ -31,6 +34,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
   setImageSize,
   padding,
   setPadding,
+  showPadding,
+  setShowPadding,
   borderRadius,
   setBorderRadius,
   shadow,
@@ -59,15 +64,24 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label>Padding: {padding}px</Label>
-        <Slider
-          value={[padding]}
-          min={0}
-          max={120}
-          step={4}
-          onValueChange={([value]) => setPadding(value)}
-        />
+      <div className="space-y-2 mb-2">
+        <div className="flex items-center justify-between">
+          <Label>Padding</Label>
+          <Switch 
+            id="show-padding"
+            checked={showPadding}
+            onCheckedChange={setShowPadding}
+          />
+        </div>
+        {showPadding && (
+          <Slider
+            value={[padding]}
+            min={0}
+            max={120}
+            step={4}
+            onValueChange={([value]) => setPadding(value)}
+          />
+        )}
       </div>
 
       <div className="space-y-2">

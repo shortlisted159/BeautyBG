@@ -28,6 +28,8 @@ interface ControlPanelProps {
   setImageSize: (size: number) => void;
   padding: number;
   setPadding: (padding: number) => void;
+  showPadding: boolean;
+  setShowPadding: (show: boolean) => void;
   borderRadius: number;
   setBorderRadius: (borderRadius: number) => void;
   shadow: number;
@@ -58,6 +60,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   setImageSize,
   padding,
   setPadding,
+  showPadding,
+  setShowPadding,
   borderRadius,
   setBorderRadius,
   shadow,
@@ -99,6 +103,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               setImageSize={setImageSize}
               padding={padding}
               setPadding={setPadding}
+              showPadding={showPadding}
+              setShowPadding={setShowPadding}
               borderRadius={borderRadius}
               setBorderRadius={setBorderRadius}
               shadow={shadow}
