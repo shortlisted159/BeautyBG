@@ -2,7 +2,7 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import GradientSelector, { Background, BackgroundType } from "../GradientSelector";
 
 interface SettingsTabProps {
@@ -93,12 +93,10 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
       </div>
 
       <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
+        <Switch 
           id="inset-shadow"
           checked={inset}
-          onChange={(e) => setInset(e.target.checked)}
-          className="h-4 w-4 rounded border-gray-300"
+          onCheckedChange={setInset}
         />
         <Label htmlFor="inset-shadow">Inset Shadow</Label>
       </div>

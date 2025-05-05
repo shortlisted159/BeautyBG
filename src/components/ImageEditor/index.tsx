@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Background } from "../GradientSelector";
@@ -119,13 +120,19 @@ const ImageEditor = () => {
 
     // @ts-ignore - html2canvas is loaded dynamically so TypeScript doesn't know about it
     if (typeof window.html2canvas === 'function') {
+      // Create a temporary container for export
       const exportContainer = document.createElement("div");
-      const previewContainer = document.createElement("div");
+      exportContainer.style.position = "fixed";
+      exportContainer.style.top = "-9999px";
+      exportContainer.style.left = "-9999px";
+      document.body.appendChild(exportContainer);
       
-      // Set the container style to match our preview
+      // Create the container that will match our preview
+      const previewContainer = document.createElement("div");
+      previewContainer.style.position = "relative";
       previewContainer.style.padding = `${padding}px`;
       
-      // Set background properties based on type
+      // Apply correct background based on type
       if (backgroundType === "image" && backgroundImage) {
         previewContainer.style.backgroundImage = `url(${backgroundImage})`;
         previewContainer.style.backgroundSize = "cover";
@@ -143,21 +150,19 @@ const ImageEditor = () => {
         }
       }
       
-      // Create the image with styling
+      // Create and style the image element
       const imgElement = document.createElement("img");
       imgElement.src = image;
-      imgElement.style.borderRadius = `${borderRadius}px`;
-      imgElement.style.boxShadow = inset
-        ? `inset 0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`
-        : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`;
-      imgElement.style.transform = `scale(${imageSize / 100})`;
-      imgElement.style.transformOrigin = "center center";
-      imgElement.style.display = "block";
       imgElement.style.width = "100%";
       imgElement.style.height = "auto";
       imgElement.style.objectFit = "contain";
+      imgElement.style.borderRadius = `${borderRadius}px`;
+      imgElement.style.boxShadow = inset 
+        ? `inset 0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})` 
+        : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`;
+      imgElement.style.transform = `scale(${imageSize / 100})`;
+      imgElement.style.transformOrigin = "center center";
       
-      // Add image to preview container
       previewContainer.appendChild(imgElement);
       
       // Add logo if present
@@ -192,30 +197,25 @@ const ImageEditor = () => {
         previewContainer.appendChild(logoImg);
       }
       
-      // Set position relative for logo positioning
-      previewContainer.style.position = "relative";
-      
-      // Append preview to export container
+      // Add the container to the DOM temporarily for html2canvas to work with
       exportContainer.appendChild(previewContainer);
       
-      // Add container to document temporarily (hidden)
-      exportContainer.style.position = "absolute";
-      exportContainer.style.left = "-9999px";
-      exportContainer.style.top = "-9999px";
-      document.body.appendChild(exportContainer);
-      
-      // Generate the image
+      // Use html2canvas to generate the final image
       // @ts-ignore
       window.html2canvas(previewContainer, {
         backgroundColor: selectedBackground.value === "transparent" ? null : undefined,
         scale: 2,
         useCORS: true,
         allowTaint: true,
+        logging: true,
       }).then((canvas: HTMLCanvasElement) => {
+        // Create download link
         const link = document.createElement("a");
         link.download = "screenshot-sparkle.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
+        
+        // Clean up
         document.body.removeChild(exportContainer);
         toast.success("Image exported successfully!");
       }).catch((error: any) => {

@@ -72,7 +72,6 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
       : `0 ${shadow / 3}px ${shadow}px rgba(0,0,0,${shadow / 100})`,
     transform: `scale(${imageSize / 100})`,
     transformOrigin: "center center",
-    display: "block", // Ensure we treat it as a block element
     width: "100%",
     height: "auto",
     objectFit: "contain" as const,
@@ -92,18 +91,16 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
             ref={resultRef}
             className="relative"
             style={{
-              maxWidth: "100%"
+              maxWidth: "100%",
+              padding: `${padding}px`
             }}
           >
-            {/* Main image container with padding */}
-            <div style={{ padding: `${padding}px` }}>
-              <img
-                src={image}
-                alt="Uploaded screenshot"
-                className="w-full h-auto"
-                style={imageStyles}
-              />
-            </div>
+            <img
+              src={image}
+              alt="Uploaded screenshot"
+              className="w-full h-auto"
+              style={imageStyles}
+            />
 
             {/* Logo positioned in the padding area */}
             {logo && (

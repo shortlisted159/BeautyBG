@@ -73,19 +73,23 @@ const GradientSelector: React.FC<GradientSelectorProps> = ({
     if (backgroundType === "plain") {
       if (selectedBackground.value.includes(',')) {
         setPlainColor(selectedBackground.value.split(',')[0]);
-      } else {
+      } else if (selectedBackground.value !== "transparent") {
         setPlainColor(selectedBackground.value);
       }
+    } else if (backgroundType === "gradient" && selectedBackground.value.includes(',')) {
+      const colors = selectedBackground.value.split(',');
+      setColor1(colors[0]);
+      setColor2(colors[1]);
     }
   }, [backgroundType, selectedBackground]);
 
   const handleCreateCustomGradient = () => {
     const newCustomGradient: Background = {
-      name: `Custom`,
+      name: "Custom",
       value: `${color1},${color2}`,
       class: `bg-gradient-to-r from-[${color1}] to-[${color2}]`
     };
-    // Apply the gradient immediately without adding to list
+    
     onSelectBackground(newCustomGradient);
   };
 
@@ -139,6 +143,7 @@ const GradientSelector: React.FC<GradientSelectorProps> = ({
               type="text" 
               value={plainColor} 
               onChange={(e) => handlePlainColorChange(e.target.value)}
+              className="flex-1"
             />
           </div>
           <div 
@@ -197,6 +202,7 @@ const GradientSelector: React.FC<GradientSelectorProps> = ({
                         type="text" 
                         value={color1} 
                         onChange={(e) => setColor1(e.target.value)}
+                        className="flex-1"
                       />
                     </div>
                   </div>
@@ -213,6 +219,7 @@ const GradientSelector: React.FC<GradientSelectorProps> = ({
                         type="text" 
                         value={color2} 
                         onChange={(e) => setColor2(e.target.value)}
+                        className="flex-1"
                       />
                     </div>
                   </div>
