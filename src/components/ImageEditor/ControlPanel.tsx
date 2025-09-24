@@ -7,6 +7,8 @@ import { Download } from "lucide-react";
 import UploadTab from "./UploadTab";
 import SettingsTab from "./SettingsTab";
 import { Background, BackgroundType } from "../GradientSelector";
+import HistoryTab from "./HistoryTab";
+import type { EditorSnapshot } from "@/hooks/useEditHistory";
 
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center-bottom";
 
@@ -40,6 +42,11 @@ interface ControlPanelProps {
   setSelectedBackground: (background: Background) => void;
   backgroundType: BackgroundType;
   setBackgroundType: (type: BackgroundType) => void;
+  history: EditorSnapshot[];
+  onSaveSnapshot: () => void;
+  onRestoreSnapshot: (id: string) => void;
+  onDeleteSnapshot: (id: string) => void;
+  onClearHistory: () => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -72,14 +79,20 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   setSelectedBackground,
   backgroundType,
   setBackgroundType,
+  history,
+  onSaveSnapshot,
+  onRestoreSnapshot,
+  onDeleteSnapshot,
+  onClearHistory,
 }) => {
   return (
     <Card className="md:w-1/3 space-y-4">
       <CardContent className="pt-6">
         <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4">
+          <TabsList className="grid grid-cols-3 mb-4">
             <TabsTrigger value="upload">Upload</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="upload">
@@ -117,6 +130,16 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               setBackgroundType={setBackgroundType}
               handleBgImageUpload={handleBgImageUpload}
               bgImageInputRef={bgImageInputRef}
+            />
+          </TabsContent>
+
+          <TabsContent value="history">
+            <HistoryTab
+              history={history}
+              onSaveCurrent={onSaveSnapshot}
+              onRestore={onRestoreSnapshot}
+              onDelete={onDeleteSnapshot}
+              onClear={onClearHistory}
             />
           </TabsContent>
         </Tabs>

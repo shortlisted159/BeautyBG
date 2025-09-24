@@ -5,6 +5,8 @@ import { Background } from "../GradientSelector";
 import ImagePreview from "./ImagePreview";
 import ControlPanel from "./ControlPanel";
 import { BackgroundType } from "../GradientSelector";
+import { useAuth } from "@/hooks/useAuth";
+import { useEditHistory } from "@/hooks/useEditHistory";
 
 // Define types
 type LogoPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center-bottom";
@@ -24,6 +26,7 @@ const backgrounds: Background[] = [
 ];
 
 const ImageEditor = () => {
+  const { user } = useAuth();
   // State
   const [image, setImage] = useState<string | null>(null);
   const [logo, setLogo] = useState<string | null>(null);
@@ -38,6 +41,7 @@ const ImageEditor = () => {
   const [inset, setInset] = useState<boolean>(false);
   const [imageSize, setImageSize] = useState<number>(100);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const { history, saveSnapshot, deleteSnapshot, clearHistory } = useEditHistory(user?.id);
   
   // Refs
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -235,6 +239,69 @@ const ImageEditor = () => {
     }
   };
 
+  // Save a snapshot of current state
+  const handleSaveSnapshot = () => {
+    saveSnapshot({
+      image,
+      logo,
+      padding,
+      showPadding,
+      borderRadius,
+      shadow,
+      inset,
+      logoSize,
+      logoPosition,
+      imageSize,
+      backgroundType,
+      selectedBackground,
+      backgroundImage,
+    }, image ? "With image" : "Settings only");
+    toast.success("Snapshot saved");
+  };
+
+  // Restore snapshot by id
+  const handleRestoreSnapshot = (id: string) => {
+    const snap = history.find(s => s.id === id);
+    if (!snap) return;
+    setImage(snap.image);
+    setLogo(snap.logo);
+    setPadding(snap.padding);
+    setShowPadding(snap.showPadding);
+    setBorderRadius(snap.borderRadius);
+    setShadow(snap.shadow);
+    setInset(snap.inset);
+    setLogoSize(snap.logoSize);
+    setLogoPosition(snap.logoPosition);
+    setImageSize(snap.imageSize);
+    setBackgroundType(snap.backgroundType);
+    setSelectedBackground(snap.selectedBackground as Background);
+    setBackgroundImage(snap.backgroundImage);
+    toast.success("Snapshot restored");
+  };
+
+  // Auto-save when significant changes occur (debounced)
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (!image) return; // only auto-save when an image exists
+      saveSnapshot({
+        image,
+        logo,
+        padding,
+        showPadding,
+        borderRadius,
+        shadow,
+        inset,
+        logoSize,
+        logoPosition,
+        imageSize,
+        backgroundType,
+        selectedBackground,
+        backgroundImage,
+      }, "Auto-save");
+    }, 1500);
+    return () => clearTimeout(id);
+  }, [image, logo, padding, showPadding, borderRadius, shadow, inset, logoSize, logoPosition, imageSize, backgroundType, selectedBackground, backgroundImage]);
+
   // Get background style based on selected type
   const getBackgroundStyle = () => {
     if (backgroundType === "image" && backgroundImage) {
@@ -296,6 +363,11 @@ const ImageEditor = () => {
         setSelectedBackground={setSelectedBackground}
         backgroundType={backgroundType}
         setBackgroundType={setBackgroundType}
+        history={history}
+        onSaveSnapshot={handleSaveSnapshot}
+        onRestoreSnapshot={handleRestoreSnapshot}
+        onDeleteSnapshot={deleteSnapshot}
+        onClearHistory={clearHistory}
       />
       
       <div className="md:w-2/3 rounded-lg overflow-hidden flex items-center justify-center min-h-[500px] bg-gray-50 dark:bg-gray-900">
